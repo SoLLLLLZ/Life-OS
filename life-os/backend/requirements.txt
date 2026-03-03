@@ -11,5 +11,5 @@ itsdangerous==2.2.0
 google-api-python-client==2.125.0
 google-auth-httplib2==0.2.0
 google-auth-oauthlib==1.2.0
-gradescopeapi==0.1.0
+gradescopeapi==1.7.0
 spotipy==2.24.0
