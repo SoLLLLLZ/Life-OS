@@ -1,0 +1,196 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background: #050810;
+  color: #e8eef5;
+  font-family: 'Rajdhani', sans-serif;
+  overflow-x: hidden;
+}
+
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(180,210,230,0.14); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(180,210,230,0.28); }
+
+/* ── FullCalendar base (night mode = default) ── */
+.fc { font-family: 'Rajdhani', sans-serif !important; }
+.fc-theme-standard td,
+.fc-theme-standard th { border-color: rgba(180,210,230,0.07) !important; }
+.fc-theme-standard .fc-scrollgrid { border-color: rgba(180,210,230,0.07) !important; }
+.fc-scrollgrid { background: transparent !important; }
+.fc-col-header-cell-cushion {
+  color: rgba(180,210,230,0.6) !important;
+  text-decoration: none !important;
+  font-family: 'Share Tech Mono', monospace !important;
+  font-size: 9px !important;
+  letter-spacing: 0.12em !important;
+  text-transform: uppercase !important;
+}
+.fc-daygrid-day-number {
+  color: rgba(180,210,230,0.45) !important;
+  text-decoration: none !important;
+}
+.fc-day-today { background: rgba(192,57,43,0.04) !important; }
+.fc-day-today .fc-col-header-cell-cushion { color: rgba(192,57,43,0.85) !important; }
+.fc-button {
+  background: rgba(180,210,230,0.07) !important;
+  border: 1px solid rgba(180,210,230,0.16) !important;
+  color: rgba(180,210,230,0.7) !important;
+  font-family: 'Rajdhani', sans-serif !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.08em !important;
+  border-radius: 3px !important;
+  padding: 4px 12px !important;
+  text-transform: uppercase !important;
+}
+.fc-button:hover { background: rgba(180,210,230,0.14) !important; color: white !important; }
+.fc-button-active,
+.fc-button-active:focus {
+  background: rgba(192,57,43,0.2) !important;
+  border-color: rgba(192,57,43,0.38) !important;
+  color: #e8a090 !important;
+}
+.fc-toolbar-title {
+  color: rgba(220,235,245,0.9) !important;
+  font-family: 'Cinzel', serif !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.08em !important;
+}
+.fc-event {
+  cursor: pointer !important;
+  border-radius: 3px !important;
+  padding: 2px 5px !important;
+  font-family: 'Rajdhani', sans-serif !important;
+  font-size: 11px !important;
+}
+.fc-event-title { font-weight: 700 !important; }
+.fc-event-time {
+  font-size: 9px !important;
+  opacity: 0.75 !important;
+  font-family: 'Share Tech Mono', monospace !important;
+}
+.fc-timegrid-slot { height: 2.8rem !important; }
+.fc-timegrid-slot-label {
+  color: rgba(180,210,230,0.38) !important;
+  font-size: 9px !important;
+  font-family: 'Share Tech Mono', monospace !important;
+}
+.fc-timegrid-now-indicator-line {
+  border-color: #c0392b !important;
+  box-shadow: 0 0 5px rgba(192,57,43,0.7) !important;
+}
+.fc-timegrid-now-indicator-arrow {
+  border-top-color: #c0392b !important;
+  border-bottom-color: #c0392b !important;
+}
+.fc-scrollgrid-section-body td { background: transparent !important; }
+.fc-daygrid-day { background: transparent !important; }
+.fc-col-header { background: rgba(5,8,16,0.7) !important; }
+.fc-toolbar { margin-bottom: 12px !important; }
+
+/* ── FullCalendar day-mode overrides ── */
+.cal-day-theme .fc-theme-standard td,
+.cal-day-theme .fc-theme-standard th { border-color: rgba(30,80,140,0.1) !important; }
+.cal-day-theme .fc-theme-standard .fc-scrollgrid { border-color: rgba(30,80,140,0.1) !important; }
+.cal-day-theme .fc-col-header-cell-cushion { color: rgba(20,50,90,0.7) !important; }
+.cal-day-theme .fc-day-today { background: rgba(192,57,43,0.03) !important; }
+.cal-day-theme .fc-day-today .fc-col-header-cell-cushion { color: rgba(150,30,20,0.85) !important; }
+.cal-day-theme .fc-daygrid-day-number { color: rgba(20,50,90,0.5) !important; }
+.cal-day-theme .fc-button {
+  background: rgba(30,80,140,0.07) !important;
+  border-color: rgba(30,80,140,0.18) !important;
+  color: rgba(20,50,90,0.7) !important;
+}
+.cal-day-theme .fc-button:hover { background: rgba(30,80,140,0.14) !important; color: rgba(10,30,70,0.95) !important; }
+.cal-day-theme .fc-button-active { background: rgba(192,57,43,0.12) !important; border-color: rgba(192,57,43,0.3) !important; color: #7f1d1d !important; }
+.cal-day-theme .fc-toolbar-title { color: rgba(15,35,75,0.9) !important; }
+.cal-day-theme .fc-timegrid-slot-label { color: rgba(20,50,90,0.42) !important; }
+.cal-day-theme .fc-col-header { background: rgba(240,248,255,0.75) !important; }
+.cal-day-theme .fc-timegrid-now-indicator-line { border-color: #c0392b !important; }
+
+/* ── Focus Mode animations ── */
+.focus-orb {
+  position: absolute;
+  border-radius: 999px;
+  filter: blur(40px);
+  opacity: 0.75;
+  animation-name: focus-pulse;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+}
+
+.focus-orb-slow {
+  opacity: 0.6;
+}
+
+.focus-rail {
+  position: absolute;
+  top: -20%;
+  width: 2px;
+  height: 140%;
+  background: linear-gradient(to bottom, rgba(192,57,43,0.4), transparent, rgba(212,160,23,0.5));
+  opacity: 0.35;
+  animation-name: focus-fly;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+.focus-rail-soft {
+  opacity: 0.2;
+  filter: blur(1px);
+}
+
+.focus-ring {
+  position: absolute;
+  inset: 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(192,57,43,0.6);
+  box-shadow: 0 0 22px rgba(192,57,43,0.35);
+  animation-name: focus-ring-pulse;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+  pointer-events: none;
+}
+
+@keyframes focus-pulse {
+  from {
+    transform: scale(0.9) translate3d(0, 0, 0);
+    opacity: 0.5;
+  }
+  to {
+    transform: scale(1.1) translate3d(0, 0, 0);
+    opacity: 0.9;
+  }
+}
+
+@keyframes focus-fly {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(40px, 0, 0);
+  }
+}
+
+@keyframes focus-ring-pulse {
+  from {
+    transform: scale(0.97);
+    box-shadow: 0 0 10px rgba(192,57,43,0.4);
+    opacity: 0.7;
+  }
+  to {
+    transform: scale(1.03);
+    box-shadow: 0 0 28px rgba(212,160,23,0.6);
+    opacity: 1;
+  }
+}
