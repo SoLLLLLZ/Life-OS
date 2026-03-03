@@ -3,10 +3,11 @@ from sqlalchemy.orm import sessionmaker, Session, DeclarativeBase
 from typing import Generator
 from app.config import settings
 
-engine = create_engine(
-    settings.database_url,
-    connect_args={"check_same_thread": False}
-)
+db_url = settings.database_url
+if db_url.startswith("postgres://"):
+    db_url = db_url.replace("postgres://", "postgresql://", 1)
+
+engine = create_engine(db_url)
 
 SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False)
 
