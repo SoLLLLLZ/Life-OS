@@ -7,7 +7,7 @@ import AlpineBackground from './components/AlpineBackground'
 
 export default function App() {
   const { user, loading } = useAuth()
-  const { accentColor, bpm, theme } = useTheme()
+  const { accentColor, bpm } = useTheme()
   const bgRef = useRef<HTMLDivElement>(null)
   const animRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const pulseRef = useRef(false)

@@ -17,7 +17,7 @@ const SUNSET_PALETTE = [
   { bg: 'rgba(251,146,60,0.2)',  border: '#fb923c', text: '#fcd34d' },
 ]
 
-function getEventStyle(source: string, title: string, theme: string) {
+function getEventStyle(source: string, title: string) {
   const p = SUNSET_PALETTE
   if (source === 'manual')     return { backgroundColor: 'rgba(167,139,250,0.2)', borderColor: '#a78bfa', textColor: '#c4b5fd' }
   if (source === 'gmail')      return { backgroundColor: 'rgba(192,57,43,0.2)',   borderColor: '#c0392b', textColor: '#e8a090' }
@@ -73,7 +73,7 @@ export default function CalendarView({ tasks, onTaskUpdate, theme }: Props) {
   const events = tasks
     .filter(t => t.due_at)
     .map(t => {
-      const style = getEventStyle(t.source, t.title, theme)
+      const style = getEventStyle(t.source, t.title)
       const start = t.due_at!
       const end = t.end_at || null
       const isDateOnly = !start.includes('T')

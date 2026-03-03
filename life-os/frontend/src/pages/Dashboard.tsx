@@ -206,7 +206,7 @@ function FocusMode({ theme, accentColor, bpm }: { theme: Theme; accentColor: str
 }
 
 export default function Dashboard() {
-  const { user, logout } = useAuth()
+  const { logout } = useAuth()
   const { theme, toggleTheme, accentColor, bpm } = useTheme()
   const [tasks, setTasks] = useState<Task[]>([])
   const [loading, setLoading] = useState(true)
