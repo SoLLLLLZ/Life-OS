@@ -1,5 +1,7 @@
 from pydantic_settings import BaseSettings
+from pydantic import field_validator
 from typing import List
+import json
 
 
 class Settings(BaseSettings):
@@ -16,15 +18,24 @@ class Settings(BaseSettings):
     spotify_client_secret: str = ""
     spotify_redirect_uri: str = "http://127.0.0.1:8000/auth/spotify/callback"
 
+    @field_validator("cors_origins", mode="before")
+    @classmethod
+    def parse_cors(cls, v):
+        if isinstance(v, str):
+            if v.startswith("["):
+                return json.loads(v)
+            return [i.strip() for i in v.split(",")]
+        return v
+
+    @property
+    def database_url_fixed(self) -> str:
+        url = self.database_url
+        if url.startswith("postgres://"):
+            url = url.replace("postgres://", "postgresql://", 1)
+        return url
+
     class Config:
         env_file = ".env"
 
 
 settings = Settings()
-
-@property
-def database_url_fixed(self) -> str:
-    url = self.database_url
-    if url.startswith("postgres://"):
-        url = url.replace("postgres://", "postgresql+psycopg2://", 1)
-    return url
