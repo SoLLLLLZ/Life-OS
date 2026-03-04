@@ -91,11 +91,25 @@ export default function GreetingHero({ tasks, theme, calView = 'week' }: Props) 
   const hour = time.getHours()
   const greeting = hour < 12 ? 'Good Morning' : hour < 17 ? 'Good Afternoon' : 'Good Evening'
 
+  const now2 = new Date()
   const today = new Date(); today.setHours(0,0,0,0)
   const weekEnd = new Date(today); weekEnd.setDate(weekEnd.getDate() + 7)
 
-  const dueToday    = tasks.filter(t => { if(!t.due_at||t.status==='done') return false; const d=new Date(t.due_at); d.setHours(0,0,0,0); return d.getTime()===today.getTime() }).length
-  const dueThisWeek = tasks.filter(t => { if(!t.due_at||t.status==='done') return false; const d=new Date(t.due_at); return d>=today&&d<=weekEnd }).length
+  const dueToday = tasks.filter(t => {
+    if (!t.due_at || t.status === 'done') return false
+    const d = new Date(t.due_at); const dDay = new Date(d); dDay.setHours(0,0,0,0)
+    if (dDay.getTime() !== today.getTime()) return false
+    // exclude if the event's end time (or 1h after start) has already passed
+    const endTime = t.end_at ? new Date(t.end_at) : new Date(d.getTime() + 60*60*1000)
+    return endTime > now2
+  }).length
+  const dueThisWeek = tasks.filter(t => {
+    if (!t.due_at || t.status === 'done') return false
+    const d = new Date(t.due_at)
+    const endTime = t.end_at ? new Date(t.end_at) : new Date(d.getTime() + 60*60*1000)
+    // only count future events within the next 7 days
+    return endTime > now2 && d <= weekEnd
+  }).length
   // Gradescope pending count filtered to the current calendar view window
   const gsWindowEnd = new Date(today)
   if (calView === 'day') {

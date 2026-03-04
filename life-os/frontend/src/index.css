@@ -95,8 +95,38 @@ body {
 .fc-daygrid-day { background: transparent !important; }
 .fc-col-header { background: rgba(5,8,16,0.7) !important; }
 .fc-toolbar { margin-bottom: 12px !important; }
-.fc-done-event { opacity: 0.38 !important; }
-.fc-past-event { opacity: 0.52 !important; }
+.fc-done-event { opacity: 0.32 !important; text-decoration: line-through; filter: saturate(0.4) !important; }
+.fc-past-event { opacity: 0.42 !important; filter: saturate(0.55) brightness(0.8) !important; }
+
+/* ── FullCalendar +more popover — night mode ── */
+.fc-popover {
+  background: rgba(8,14,24,0.97) !important;
+  border: 1px solid rgba(180,210,230,0.14) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.6) !important;
+  backdrop-filter: blur(20px) !important;
+}
+.fc-popover-header {
+  background: rgba(180,210,230,0.06) !important;
+  color: rgba(180,210,230,0.7) !important;
+  font-family: 'Share Tech Mono', monospace !important;
+  font-size: 9px !important;
+  letter-spacing: 0.18em !important;
+  text-transform: uppercase !important;
+  padding: 8px 12px !important;
+  border-bottom: 1px solid rgba(180,210,230,0.08) !important;
+  border-radius: 8px 8px 0 0 !important;
+}
+.fc-popover-close {
+  color: rgba(180,210,230,0.45) !important;
+  font-size: 14px !important;
+}
+.fc-popover-body {
+  padding: 8px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 3px !important;
+}
 
 /* ── FullCalendar day-mode overrides ── */
 .cal-day-theme .fc-theme-standard td,
@@ -117,6 +147,17 @@ body {
 .cal-day-theme .fc-timegrid-slot-label { color: rgba(20,50,90,0.42) !important; }
 .cal-day-theme .fc-col-header { background: rgba(240,248,255,0.75) !important; }
 .cal-day-theme .fc-timegrid-now-indicator-line { border-color: #c0392b !important; }
+.cal-day-theme .fc-popover {
+  background: rgba(245,250,255,0.97) !important;
+  border: 1px solid rgba(30,80,140,0.16) !important;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.12) !important;
+}
+.cal-day-theme .fc-popover-header {
+  background: rgba(30,80,140,0.05) !important;
+  color: rgba(20,50,100,0.7) !important;
+  border-bottom: 1px solid rgba(30,80,140,0.1) !important;
+}
+.cal-day-theme .fc-popover-close { color: rgba(20,50,100,0.45) !important; }
 
 /* ── Focus Mode animations ── */
 .focus-orb {

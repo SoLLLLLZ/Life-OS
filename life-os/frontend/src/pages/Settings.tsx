@@ -8,7 +8,11 @@ interface IntegrationStatus {
   spotify: boolean
 }
 
-export default function Settings() {
+interface Props {
+  theme: 'sunset' | 'tokyo'
+}
+
+export default function Settings({ theme }: Props) {
   const { user, logout } = useAuth()
   const [status, setStatus] = useState<IntegrationStatus>({
     google: false,
@@ -17,6 +21,30 @@ export default function Settings() {
   })
   const [loading, setLoading] = useState(true)
   const [syncing, setSyncing] = useState<string | null>(null)
+  const n = theme === 'tokyo'
+
+  const T = {
+    bg:         n ? 'rgba(10,18,32,0.94)'       : 'rgba(255,255,255,0.90)',
+    cardBg:     n ? 'rgba(180,210,230,0.05)'     : 'rgba(30,80,140,0.05)',
+    rowBg:      n ? 'rgba(180,210,230,0.04)'     : 'rgba(30,80,140,0.04)',
+    border:     n ? 'rgba(180,210,230,0.12)'     : 'rgba(30,80,140,0.14)',
+    text:       n ? '#e8eef5'                    : '#0f2040',
+    textSub:    n ? 'rgba(180,210,230,0.55)'     : 'rgba(20,50,100,0.65)',
+    textFaint:  n ? 'rgba(180,210,230,0.35)'     : 'rgba(20,50,100,0.45)',
+    btnBg:      n ? 'rgba(180,210,230,0.08)'     : 'rgba(30,80,140,0.07)',
+    btnBorder:  n ? 'rgba(180,210,230,0.16)'     : 'rgba(30,80,140,0.18)',
+    btnFg:      n ? 'rgba(180,210,230,0.65)'     : 'rgba(20,50,100,0.7)',
+    accentBg:   n ? 'rgba(192,57,43,0.14)'       : 'rgba(192,57,43,0.08)',
+    accentBr:   n ? 'rgba(192,57,43,0.32)'       : 'rgba(192,57,43,0.28)',
+    accentFg:   n ? '#f0a090'                    : '#7f1d1d',
+    greenBg:    n ? 'rgba(52,211,153,0.12)'      : 'rgba(22,163,74,0.08)',
+    greenFg:    n ? '#34d399'                    : '#14532d',
+    greenBr:    n ? 'rgba(52,211,153,0.28)'      : 'rgba(22,163,74,0.22)',
+    grayBg:     n ? 'rgba(180,210,230,0.06)'     : 'rgba(30,80,140,0.06)',
+    grayFg:     n ? 'rgba(180,210,230,0.35)'     : 'rgba(20,50,100,0.45)',
+    grayBr:     n ? 'rgba(180,210,230,0.14)'     : 'rgba(30,80,140,0.14)',
+    dangerHover:n ? 'rgba(192,57,43,0.18)'       : 'rgba(192,57,43,0.08)',
+  }
 
   const fetchStatus = async () => {
     try {
@@ -29,9 +57,7 @@ export default function Settings() {
     }
   }
 
-  useEffect(() => {
-    fetchStatus()
-  }, [])
+  useEffect(() => { fetchStatus() }, [])
 
   const handleConnectSpotify = () => {
     const token = localStorage.getItem('token')
@@ -89,113 +115,155 @@ export default function Settings() {
     },
   ]
 
-  return (
-    <div className="min-h-screen text-white px-6 py-8 max-w-2xl mx-auto">
-      <h1 className="text-3xl font-bold mb-2">Settings</h1>
-      <p className="text-white/40 mb-8">Manage your account and integrations</p>
+  const card = (children: React.ReactNode) => (
+    <div style={{
+      background: T.cardBg, border: `1px solid ${T.border}`,
+      borderRadius: '12px', padding: '24px', marginBottom: '16px',
+      backdropFilter: 'blur(18px)', WebkitBackdropFilter: 'blur(18px)',
+    }}>{children}</div>
+  )
 
-      {/* Account section */}
-      <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 mb-6">
-        <h2 className="text-lg font-semibold mb-4">Account</h2>
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-white font-medium">{user?.name || 'User'}</p>
-            <p className="text-white/40 text-sm mt-0.5">{user?.email}</p>
-          </div>
-          <button
-            onClick={logout}
-            className="bg-white/10 hover:bg-red-500/20 text-white/60 hover:text-red-400 px-4 py-2 rounded-lg text-sm transition-colors"
-          >
-            Sign out
-          </button>
-        </div>
+  const sectionTitle = (label: string) => (
+    <div style={{
+      fontFamily: "'Cinzel', serif", fontSize: '11px', fontWeight: 600,
+      letterSpacing: '0.25em', textTransform: 'uppercase' as const,
+      color: T.textSub, marginBottom: '16px',
+      display: 'flex', alignItems: 'center', gap: '8px',
+    }}>
+      <span style={{ color: 'rgba(192,57,43,0.55)', fontSize: '7px' }}>◆</span>
+      {label}
+    </div>
+  )
+
+  const btn = (label: string, onClick: () => void, disabled = false, variant: 'ghost' | 'accent' | 'danger' = 'ghost') => {
+    const bg = variant === 'accent' ? T.accentBg : variant === 'danger' ? T.dangerHover : T.btnBg
+    const br = variant === 'accent' ? T.accentBr : T.btnBorder
+    const fg = variant === 'accent' ? T.accentFg : variant === 'danger' ? (n ? '#f0a090' : '#7f1d1d') : T.btnFg
+    return (
+      <button onClick={onClick} disabled={disabled} style={{
+        padding: '6px 14px', fontFamily: "'Rajdhani', sans-serif",
+        fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em',
+        textTransform: 'uppercase' as const, borderRadius: '3px', cursor: 'pointer',
+        background: bg, border: `1px solid ${br}`, color: fg,
+        opacity: disabled ? 0.5 : 1, transition: 'all 0.15s',
+      }}>{label}</button>
+    )
+  }
+
+  return (
+    <div style={{
+      minHeight: 'calc(100vh - 60px)', padding: '32px 36px',
+      maxWidth: '680px', margin: '0 auto',
+    }}>
+      <div style={{ fontFamily: "'Cinzel', serif", fontSize: '22px', fontWeight: 700,
+        letterSpacing: '0.08em', color: T.text, marginBottom: '6px' }}>
+        Forge
+      </div>
+      <div style={{ fontFamily: "'Crimson Pro', serif", fontSize: '14px', fontStyle: 'italic',
+        color: T.textSub, marginBottom: '28px' }}>
+        Manage your account and integrations
       </div>
 
-      {/* Integrations section */}
-      <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold">Integrations</h2>
+      {/* Account */}
+      {card(
+        <>
+          {sectionTitle('Account')}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div>
+              <div style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '15px',
+                fontWeight: 700, color: T.text, letterSpacing: '0.04em' }}>
+                {user?.name || 'User'}
+              </div>
+              <div style={{ fontFamily: "'Share Tech Mono', monospace", fontSize: '10px',
+                color: T.textFaint, marginTop: '3px', letterSpacing: '0.06em' }}>
+                {user?.email}
+              </div>
+            </div>
+            {btn('Sign Out', logout, false, 'danger')}
+          </div>
+        </>
+      )}
+
+      {/* Integrations */}
+      {card(
+        <>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+            {sectionTitle('Integrations')}
+            {btn(syncing === 'all' ? '↻ Syncing...' : '↻ Sync All', () => handleSync('all'), syncing !== null)}
+          </div>
+
+          {loading ? (
+            <div style={{ fontFamily: "'Share Tech Mono', monospace", fontSize: '10px',
+              color: T.textFaint, textAlign: 'center', padding: '24px 0' }}>Loading...</div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {integrations.map(integration => (
+                <div key={integration.id} style={{
+                  display: 'flex', alignItems: 'center', gap: '14px',
+                  background: T.rowBg, border: `1px solid ${T.border}`,
+                  borderRadius: '8px', padding: '14px 16px',
+                }}>
+                  <div style={{ fontSize: '22px', flexShrink: 0 }}>{integration.icon}</div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '3px' }}>
+                      <span style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '14px',
+                        fontWeight: 700, color: T.text }}>
+                        {integration.name}
+                      </span>
+                      <span style={{
+                        fontFamily: "'Share Tech Mono', monospace", fontSize: '8px',
+                        letterSpacing: '0.08em', padding: '2px 8px', borderRadius: '2px',
+                        background: integration.connected ? T.greenBg : T.grayBg,
+                        color: integration.connected ? T.greenFg : T.grayFg,
+                        border: `1px solid ${integration.connected ? T.greenBr : T.grayBr}`,
+                      }}>
+                        {integration.connected ? 'Connected' : 'Not Connected'}
+                      </span>
+                    </div>
+                    <div style={{ fontFamily: "'Crimson Pro', serif", fontSize: '12px',
+                      fontStyle: 'italic', color: T.textFaint }}>
+                      {integration.description}
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
+                    {integration.onSync && integration.connected &&
+                      btn(syncing === integration.id ? 'Syncing...' : '↻ Sync',
+                        integration.onSync, syncing === integration.id)}
+                    {!integration.connected && integration.onConnect &&
+                      btn('Connect', integration.onConnect, false, 'accent')}
+                    {integration.connected && integration.id === 'spotify' &&
+                      btn('Reconnect', handleConnectSpotify)}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </>
+      )}
+
+      {/* Data */}
+      {card(
+        <>
+          {sectionTitle('Data')}
+          <div style={{ fontFamily: "'Crimson Pro', serif", fontSize: '13px', fontStyle: 'italic',
+            color: T.textSub, marginBottom: '16px' }}>
+            Sync all connected integrations to get the latest tasks and events
+          </div>
           <button
             onClick={() => handleSync('all')}
             disabled={syncing !== null}
-            className="text-white/60 hover:text-white text-sm bg-white/10 px-3 py-1.5 rounded-lg transition-colors"
+            style={{
+              width: '100%', padding: '12px', fontFamily: "'Rajdhani', sans-serif",
+              fontSize: '12px', fontWeight: 700, letterSpacing: '0.15em',
+              textTransform: 'uppercase' as const, borderRadius: '6px', cursor: 'pointer',
+              background: T.accentBg, border: `1px solid ${T.accentBr}`,
+              color: T.accentFg, opacity: syncing !== null ? 0.5 : 1, transition: 'all 0.15s',
+            }}
           >
-            {syncing === 'all' ? 'Syncing...' : '↻ Sync All'}
+            {syncing === 'all' ? '↻ Invoking Sync...' : '↻ Invoke Full Sync'}
           </button>
-        </div>
-
-        {loading ? (
-          <div className="text-white/30 text-center py-8">Loading...</div>
-        ) : (
-          <div className="flex flex-col gap-4">
-            {integrations.map(integration => (
-              <div
-                key={integration.id}
-                className="flex items-center gap-4 bg-white/5 rounded-xl p-4"
-              >
-                <div className="text-3xl">{integration.icon}</div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <p className="text-white font-medium">{integration.name}</p>
-                    <span className={`text-xs px-2 py-0.5 rounded-full ${
-                      integration.connected
-                        ? 'bg-green-500/20 text-green-400'
-                        : 'bg-white/10 text-white/30'
-                    }`}>
-                      {integration.connected ? 'Connected' : 'Not connected'}
-                    </span>
-                  </div>
-                  <p className="text-white/40 text-xs mt-0.5 truncate">
-                    {integration.description}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2 flex-shrink-0">
-                  {integration.onSync && integration.connected && (
-                    <button
-                      onClick={integration.onSync}
-                      disabled={syncing === integration.id}
-                      className="text-white/50 hover:text-white text-sm bg-white/10 px-3 py-1.5 rounded-lg transition-colors"
-                    >
-                      {syncing === integration.id ? 'Syncing...' : '↻ Sync'}
-                    </button>
-                  )}
-                  {!integration.connected && integration.onConnect && (
-                    <button
-                      onClick={integration.onConnect}
-                      className="bg-white/20 hover:bg-white/30 text-white text-sm px-4 py-1.5 rounded-lg transition-colors"
-                    >
-                      Connect
-                    </button>
-                  )}
-                  {integration.connected && integration.id === 'spotify' && (
-                    <button
-                      onClick={handleConnectSpotify}
-                      className="text-white/30 hover:text-white text-sm bg-white/5 px-3 py-1.5 rounded-lg transition-colors"
-                    >
-                      Reconnect
-                    </button>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Sync all button */}
-      <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6">
-        <h2 className="text-lg font-semibold mb-2">Data</h2>
-        <p className="text-white/40 text-sm mb-4">
-          Sync all connected integrations to get the latest tasks and events
-        </p>
-        <button
-          onClick={() => handleSync('all')}
-          disabled={syncing !== null}
-          className="w-full bg-white/10 hover:bg-white/20 text-white py-3 rounded-xl transition-colors font-medium"
-        >
-          {syncing === 'all' ? '↻ Syncing everything...' : '↻ Sync Everything'}
-        </button>
-      </div>
+        </>
+      )}
     </div>
   )
 }
