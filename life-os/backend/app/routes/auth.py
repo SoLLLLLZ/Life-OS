@@ -26,14 +26,17 @@ oauth.register(
     server_metadata_url="https://accounts.google.com/.well-known/openid-configuration",
     client_kwargs={
         "scope": "openid email profile https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/gmail.readonly",
-        "prompt": "select_account",  # always show account picker
     },
 )
 
 
 @router.get("/google/login")
 async def google_login(request: Request):
-    return await oauth.google.authorize_redirect(request, settings.google_redirect_uri)
+    return await oauth.google.authorize_redirect(
+        request,
+        settings.google_redirect_uri,
+        prompt="select_account"
+    )
 
 
 @router.get("/google/callback")
@@ -93,7 +96,7 @@ async def google_callback(request: Request, db: Session = Depends(get_db)):
 
     # Create JWT and redirect to frontend
     jwt_token = create_access_token({"sub": str(user.id)})
-    return RedirectResponse(url=f"https://SoLLLLLZ.github.io/life-os?token={jwt_token}")
+    return RedirectResponse(url=f"https://SoLLLLLZ.github.io/Life-OS?token={jwt_token}")
 
 
 @router.get("/me")
@@ -103,6 +106,6 @@ def get_me(user: User = Depends(get_current_user)):
 
 @router.post("/logout")
 def logout():
-    response = RedirectResponse(url="https://SoLLLLLZ.github.io/life-os")
+    response = RedirectResponse(url="https://SoLLLLLZ.github.io/Life-OS")
     response.delete_cookie("access_token")
     return response
