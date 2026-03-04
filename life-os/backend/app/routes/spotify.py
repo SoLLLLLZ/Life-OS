@@ -10,6 +10,7 @@ import urllib.parse
 from app.config import settings
 from app.database import get_db
 from app.models import User, IntegrationToken
+from app.auth import get_current_user
 from app.services.spotify_service import (
     get_current_playback, play, pause, next_track, previous_track, set_volume
 )
@@ -27,7 +28,7 @@ def spotify_login(token: str = Query(default="")):
     params = {
         "client_id": settings.spotify_client_id,
         "response_type": "code",
-        "redirect_uri": "https://life-os-j3cz.onrender.com/auth/spotify/callback",
+        "redirect_uri": settings.spotify_redirect_uri,
         "scope": SPOTIFY_SCOPES,
         "state": token,
     }
@@ -68,7 +69,7 @@ async def spotify_callback(
             data={
                 "grant_type": "authorization_code",
                 "code": code,
-                "redirect_uri": "https://life-os-j3cz.onrender.com/auth/spotify/callback",
+                "redirect_uri": settings.spotify_redirect_uri,
             },
         )
 
@@ -104,13 +105,13 @@ async def spotify_callback(
         db.add(new_token)
 
     db.commit()
-    return RedirectResponse(url="https://solllllz.github.io/Life-OS")
+    return RedirectResponse(url=settings.frontend_url)
 
 
 @router.get("/current")
 def current_playback(
     db: Session = Depends(get_db),
-    user: User = Depends(__import__('app.auth', fromlist=['get_current_user']).get_current_user),
+    user: User = Depends(get_current_user),
 ):
     playback = get_current_playback(user, db)
     if playback is None:
@@ -121,7 +122,7 @@ def current_playback(
 @router.post("/play")
 def play_track(
     db: Session = Depends(get_db),
-    user: User = Depends(__import__('app.auth', fromlist=['get_current_user']).get_current_user),
+    user: User = Depends(get_current_user),
 ):
     if not play(user, db):
         raise HTTPException(status_code=400, detail="Could not play")
@@ -131,7 +132,7 @@ def play_track(
 @router.post("/pause")
 def pause_track(
     db: Session = Depends(get_db),
-    user: User = Depends(__import__('app.auth', fromlist=['get_current_user']).get_current_user),
+    user: User = Depends(get_current_user),
 ):
     if not pause(user, db):
         raise HTTPException(status_code=400, detail="Could not pause")
@@ -141,7 +142,7 @@ def pause_track(
 @router.post("/next")
 def next_track_route(
     db: Session = Depends(get_db),
-    user: User = Depends(__import__('app.auth', fromlist=['get_current_user']).get_current_user),
+    user: User = Depends(get_current_user),
 ):
     if not next_track(user, db):
         raise HTTPException(status_code=400, detail="Could not skip")
@@ -151,7 +152,7 @@ def next_track_route(
 @router.post("/previous")
 def previous_track_route(
     db: Session = Depends(get_db),
-    user: User = Depends(__import__('app.auth', fromlist=['get_current_user']).get_current_user),
+    user: User = Depends(get_current_user),
 ):
     if not previous_track(user, db):
         raise HTTPException(status_code=400, detail="Could not go back")
@@ -162,7 +163,7 @@ def previous_track_route(
 def set_volume_route(
     volume: int = Query(..., ge=0, le=100),
     db: Session = Depends(get_db),
-    user: User = Depends(__import__('app.auth', fromlist=['get_current_user']).get_current_user),
+    user: User = Depends(get_current_user),
 ):
     if not set_volume(user, db, volume):
         raise HTTPException(status_code=400, detail="Could not set volume")

@@ -55,7 +55,6 @@ async def google_callback(request: Request, db: Session = Depends(get_db)):
     google_id = userinfo["sub"]
     name = userinfo.get("name")
 
-    # Find or create user
     user = db.execute(select(User).where(User.email == email)).scalar_one_or_none()
     if not user:
         user = User(email=email, name=name, google_account_id=google_id)
@@ -67,7 +66,6 @@ async def google_callback(request: Request, db: Session = Depends(get_db)):
         user.google_account_id = google_id
         db.commit()
 
-    # Save or update integration token
     existing_token = db.execute(
         select(IntegrationToken).where(
             IntegrationToken.user_id == user.id,
@@ -94,9 +92,8 @@ async def google_callback(request: Request, db: Session = Depends(get_db)):
         db.add(new_token)
         db.commit()
 
-    # Create JWT and redirect to frontend
     jwt_token = create_access_token({"sub": str(user.id)})
-    return RedirectResponse(url=f"https://solllllz.github.io/Life-OS?token={jwt_token}")
+    return RedirectResponse(url=f"{settings.frontend_url}?token={jwt_token}")
 
 
 @router.get("/me")
@@ -106,17 +103,6 @@ def get_me(user: User = Depends(get_current_user)):
 
 @router.post("/logout")
 def logout():
-    response = RedirectResponse(url="https://SoLLLLLZ.github.io/Life-OS")
+    response = RedirectResponse(url=settings.frontend_url)
     response.delete_cookie("access_token")
     return response
-
-@router.get("/google/login")
-async def google_login(request: Request):
-    import os
-    logger.info(f"GOOGLE_REDIRECT_URI env: {os.environ.get('GOOGLE_REDIRECT_URI')}")
-    logger.info(f"settings.google_redirect_uri: {settings.google_redirect_uri}")
-    return await oauth.google.authorize_redirect(
-        request,
-        settings.google_redirect_uri,
-        prompt="select_account"
-    )

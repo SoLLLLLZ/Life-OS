@@ -110,7 +110,7 @@ export default function SpotifyPlayer({ theme = 'tokyo' }: Props) {
       <div style={{fontFamily:"'Crimson Pro',serif",fontStyle:'italic',fontSize:'14px',color:T.textSub,marginBottom:'14px'}}>
         Spotify not connected
       </div>
-      <button onClick={()=>{const t=localStorage.getItem('token');window.location.href=`http://127.0.0.1:8000/auth/spotify/login?token=${t}`}}
+      <button onClick={()=>{const t=localStorage.getItem('token');window.location.href=`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/auth/spotify/login?token=${t}`}}
         style={{padding:'8px 20px',
           background:n?'linear-gradient(135deg,rgba(192,57,43,0.28),rgba(212,160,23,0.18))':'linear-gradient(135deg,rgba(192,57,43,0.16),rgba(212,160,23,0.1))',
           border:`1px solid ${T.playBorder}`,color:T.connectFg,borderRadius:'4px',cursor:'pointer',
