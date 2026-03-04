@@ -215,6 +215,7 @@ export default function Dashboard() {
   const [sourceFilter, setSourceFilter] = useState('all')
   const [showSettings, setShowSettings] = useState(false)
   const [focusMode, setFocusMode] = useState(false)
+  const [calView, setCalView] = useState<'month' | 'week' | 'day'>('week')
   const n = theme === 'tokyo' // isNight
 
   // ── Theme tokens ──
@@ -265,9 +266,28 @@ export default function Dashboard() {
   }
 
   const pending   = tasks.filter(t => t.status==='pending')
-  const completed = tasks.filter(t => t.status==='done')
+  const allCompleted = tasks.filter(t => t.status==='done')
   const filtered  = sourceFilter==='all' ? pending : pending.filter(t => t.source===sourceFilter)
   const calendarTasks = sourceFilter==='all' ? tasks : tasks.filter(t => t.source===sourceFilter)
+
+  // Filter completed tasks to the current calendar view window
+  const now = new Date(); now.setHours(0,0,0,0)
+  const completedWindowStart = new Date(now)
+  const completedWindowEnd   = new Date(now)
+  if (calView === 'day') {
+    completedWindowEnd.setDate(completedWindowEnd.getDate() + 1)
+  } else if (calView === 'week') {
+    completedWindowStart.setDate(completedWindowStart.getDate() - 7)
+    completedWindowEnd.setDate(completedWindowEnd.getDate() + 7)
+  } else {
+    completedWindowStart.setDate(completedWindowStart.getDate() - 30)
+    completedWindowEnd.setMonth(completedWindowEnd.getMonth() + 1)
+  }
+  const completed = allCompleted.filter(t => {
+    if (!t.due_at) return calView === 'month'
+    const d = new Date(t.due_at)
+    return d >= completedWindowStart && d <= completedWindowEnd
+  })
 
   const sectionHead = (label: string) => (
     <div style={{ fontFamily:"'Cinzel',serif", fontSize:'10px', fontWeight:600,
@@ -382,7 +402,7 @@ export default function Dashboard() {
       ) : (
         <>
           {/* ── GREETING HERO ── */}
-          <GreetingHero tasks={tasks} theme={theme} />
+          <GreetingHero tasks={tasks} theme={theme} calView={calView} />
 
           {/* ── FILTER BAR ── */}
           {view !== 'completed' && (
@@ -414,7 +434,7 @@ export default function Dashboard() {
               {view==='calendar' && card(
                 <><div className={n?'':'cal-day-theme'}>{sectionHead('Schedule Matrix')}</div>
                   <div className={n?'':'cal-day-theme'}>
-                    <CalendarView tasks={calendarTasks} onTaskUpdate={fetchTasks} theme={theme}/>
+                    <CalendarView tasks={calendarTasks} onTaskUpdate={fetchTasks} theme={theme} onViewChange={setCalView}/>
                   </div></>,
               )}
               {view==='tasks' && card(
@@ -422,7 +442,7 @@ export default function Dashboard() {
                   <TaskList tasks={filtered} loading={loading} onTaskUpdate={fetchTasks} theme={theme}/></>,
               )}
               {view==='completed' && card(
-                <>{sectionHead('Vanquished Quests')}
+                <>{sectionHead(`Vanquished Quests · ${calView === 'day' ? 'Today' : calView === 'week' ? 'This Week' : 'This Month'}`)}
                   {completed.length===0 ? (
                     <p style={{ color:T.textFaint, textAlign:'center', padding:'40px 0',
                       fontFamily:"'Crimson Pro',serif", fontStyle:'italic', fontSize:'16px' }}>

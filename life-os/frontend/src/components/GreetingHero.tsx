@@ -4,6 +4,7 @@ import type { Task } from '../types'
 interface Props {
   tasks: Task[]
   theme: 'sunset' | 'tokyo'
+  calView?: 'month' | 'week' | 'day'
 }
 
 interface StatCardProps {
@@ -81,7 +82,7 @@ function StatCard({ label, icon, value, sublabel, trend, color, isNight }: StatC
   )
 }
 
-export default function GreetingHero({ tasks, theme }: Props) {
+export default function GreetingHero({ tasks, theme, calView = 'week' }: Props) {
   const [time, setTime] = useState(new Date())
   const isNight = theme === 'tokyo'
 
@@ -95,8 +96,45 @@ export default function GreetingHero({ tasks, theme }: Props) {
 
   const dueToday    = tasks.filter(t => { if(!t.due_at||t.status==='done') return false; const d=new Date(t.due_at); d.setHours(0,0,0,0); return d.getTime()===today.getTime() }).length
   const dueThisWeek = tasks.filter(t => { if(!t.due_at||t.status==='done') return false; const d=new Date(t.due_at); return d>=today&&d<=weekEnd }).length
-  const completed   = tasks.filter(t => t.status==='done').length
-  const gradescope  = tasks.filter(t => t.source==='gradescope'&&t.status==='pending').length
+  // Gradescope pending count filtered to the current calendar view window
+  const gsWindowEnd = new Date(today)
+  if (calView === 'day') {
+    gsWindowEnd.setDate(gsWindowEnd.getDate() + 1)
+  } else if (calView === 'week') {
+    gsWindowEnd.setDate(gsWindowEnd.getDate() + 7)
+  } else {
+    gsWindowEnd.setMonth(gsWindowEnd.getMonth() + 1)
+  }
+  const gradescope = tasks.filter(t => {
+    if (t.source !== 'gradescope' || t.status !== 'pending') return false
+    if (!t.due_at) return false // no due date = no window to place it
+    const d = new Date(t.due_at)
+    return d >= today && d <= gsWindowEnd
+  }).length
+
+  // Vanquished: count completed tasks within the calendar's current view window
+  const vanquishedWindowStart = new Date(today)
+  const vanquishedWindowEnd   = new Date(today)
+  if (calView === 'day') {
+    // just today
+    vanquishedWindowEnd.setDate(vanquishedWindowEnd.getDate() + 1)
+  } else if (calView === 'week') {
+    // last 7 days through next 7 days (current week context)
+    vanquishedWindowStart.setDate(vanquishedWindowStart.getDate() - 7)
+    vanquishedWindowEnd.setDate(vanquishedWindowEnd.getDate() + 7)
+  } else {
+    // month: last 30 days through end of month
+    vanquishedWindowStart.setDate(vanquishedWindowStart.getDate() - 30)
+    vanquishedWindowEnd.setMonth(vanquishedWindowEnd.getMonth() + 1)
+  }
+  const completed = tasks.filter(t => {
+    if (t.status !== 'done') return false
+    if (!t.due_at) return calView === 'month' // tasks without dates count in month view only
+    const d = new Date(t.due_at)
+    return d >= vanquishedWindowStart && d <= vanquishedWindowEnd
+  }).length
+
+  const vanquishedSublabel = calView === 'day' ? 'today' : calView === 'week' ? 'this week' : 'this month'
 
   const days   = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']
   const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
@@ -159,9 +197,9 @@ export default function GreetingHero({ tasks, theme }: Props) {
         trend={dueToday>3?{text:'⚠ urgent',type:'warn'}:{text:'→ on track',type:'neutral'}}/>
       <StatCard label="This Week"  icon="⚔"  value={dueThisWeek} sublabel="tasks & events" color="gold"  isNight={isNight}
         trend={{text:'→ steady',type:'neutral'}}/>
-      <StatCard label="Vanquished" icon="✦"  value={completed}   sublabel="completed"      color="ice"   isNight={isNight}
+      <StatCard label="Vanquished" icon="✦"  value={completed}   sublabel={vanquishedSublabel} color="ice"   isNight={isNight}
         trend={{text:'↑ great work',type:'up'}}/>
-      <StatCard label="Gradescope" icon="📜" value={gradescope}  sublabel="open scrolls"   color="amber" isNight={isNight}
+      <StatCard label="Gradescope" icon="📜" value={gradescope}  sublabel={calView === 'day' ? 'due today' : calView === 'week' ? 'due this week' : 'due this month'} color="amber" isNight={isNight}
         trend={gradescope>0?{text:'⚠ pending',type:'warn'}:{text:'✓ clear',type:'up'}}/>
     </div>
   )
