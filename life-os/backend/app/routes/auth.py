@@ -109,3 +109,14 @@ def logout():
     response = RedirectResponse(url="https://SoLLLLLZ.github.io/Life-OS")
     response.delete_cookie("access_token")
     return response
+
+@router.get("/google/login")
+async def google_login(request: Request):
+    import os
+    logger.info(f"GOOGLE_REDIRECT_URI env: {os.environ.get('GOOGLE_REDIRECT_URI')}")
+    logger.info(f"settings.google_redirect_uri: {settings.google_redirect_uri}")
+    return await oauth.google.authorize_redirect(
+        request,
+        settings.google_redirect_uri,
+        prompt="select_account"
+    )
