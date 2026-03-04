@@ -4,7 +4,7 @@ export default function Login() {
   const { theme, toggleTheme } = useTheme()
 
   const handleGoogleLogin = () => {
-    window.location.href = 'http://127.0.0.1:8000/auth/google/login'
+    window.location.href = "https://Life-OS.onrender.com/auth/google/login"
   }
 
   return (
