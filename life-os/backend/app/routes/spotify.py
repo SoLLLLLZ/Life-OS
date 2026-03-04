@@ -104,7 +104,7 @@ async def spotify_callback(
         db.add(new_token)
 
     db.commit()
-    return RedirectResponse(url="http://localhost:5173")
+    return RedirectResponse(url="https://solllllz.github.io/Life-OS")
 
 
 @router.get("/current")
