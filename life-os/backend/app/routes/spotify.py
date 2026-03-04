@@ -27,7 +27,7 @@ def spotify_login(token: str = Query(default="")):
     params = {
         "client_id": settings.spotify_client_id,
         "response_type": "code",
-        "redirect_uri": settings.spotify_redirect_uri,
+        "redirect_uri": "https://life-os-j3cz.onrender.com/auth/spotify/callback",
         "scope": SPOTIFY_SCOPES,
         "state": token,
     }
@@ -68,7 +68,7 @@ async def spotify_callback(
             data={
                 "grant_type": "authorization_code",
                 "code": code,
-                "redirect_uri": settings.spotify_redirect_uri,
+                "redirect_uri": "https://life-os-j3cz.onrender.com/auth/spotify/callback",
             },
         )
 
