@@ -399,7 +399,7 @@ export default function CalendarView({ tasks, onTaskUpdate, theme, onViewChange 
         .fc-event-title { font-weight: 700 !important; }
         .fc-event-time { font-size: 9px !important; opacity: 0.75 !important; font-family: 'Share Tech Mono', monospace !important; }
         .fc-done-event { opacity: 0.32 !important; text-decoration: line-through; filter: saturate(0.4) !important; }
-        .fc-past-event { opacity: 0.42 !important; filter: saturate(0.55) brightness(0.8) !important; }
+        .fc-past-event { opacity: 0.55 !important; filter: saturate(0.6) brightness(0.85) !important; }
         .fc-timegrid-slot { height: 2.8rem !important; }
         .fc-timegrid-slot-label { color: ${n ? 'rgba(180,210,230,0.38)' : 'rgba(20,50,100,0.42)'} !important; font-size: 9px !important; font-family: 'Share Tech Mono', monospace !important; }
         .fc-timegrid-now-indicator-line { border-color: #c0392b !important; box-shadow: 0 0 5px rgba(192,57,43,0.7) !important; }
@@ -426,9 +426,9 @@ export default function CalendarView({ tasks, onTaskUpdate, theme, onViewChange 
           right: 'dayGridMonth,timeGridWeek,timeGridDay',
         }}
         events={events}
-        scrollTime="08:00:00"
+        scrollTime="06:00:00"
         height={600}
-        slotMinTime="06:00:00"
+        slotMinTime="00:00:00"
         slotMaxTime="26:00:00"
         allDaySlot={true}
         nowIndicator={true}

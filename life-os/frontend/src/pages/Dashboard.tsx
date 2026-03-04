@@ -265,24 +265,41 @@ export default function Dashboard() {
     finally { setSyncing(false) }
   }
 
-  const pending   = tasks.filter(t => t.status==='pending')
-  const allCompleted = tasks.filter(t => t.status==='done')
-  const filtered  = sourceFilter==='all' ? pending : pending.filter(t => t.source===sourceFilter)
-  const calendarTasks = sourceFilter==='all' ? tasks : tasks.filter(t => t.source===sourceFilter)
+  const now = new Date()
 
-  // Filter completed tasks to the current calendar view window
-  const now = new Date(); now.setHours(0,0,0,0)
-  const completedWindowStart = new Date(now)
-  const completedWindowEnd   = new Date(now)
-  if (calView === 'day') {
-    completedWindowEnd.setDate(completedWindowEnd.getDate() + 1)
-  } else if (calView === 'week') {
-    completedWindowStart.setDate(completedWindowStart.getDate() - 7)
-    completedWindowEnd.setDate(completedWindowEnd.getDate() + 7)
-  } else {
-    completedWindowStart.setDate(completedWindowStart.getDate() - 30)
-    completedWindowEnd.setMonth(completedWindowEnd.getMonth() + 1)
+  const computeEndTime = (t: Task): Date | null => {
+    if (!t.due_at) return null
+    if (t.end_at) return new Date(t.end_at)
+    if (!t.due_at.includes('T')) {
+      // all-day: expires at end of that day
+      const d = new Date(t.due_at); d.setHours(23, 59, 59, 999); return d
+    }
+    return new Date(new Date(t.due_at).getTime() + 60 * 60 * 1000)
   }
+
+  const isEffectivelyDone = (t: Task): boolean => {
+    if (t.status === 'done') return true
+    const end = computeEndTime(t)
+    return end !== null && end < now
+  }
+
+  const pending      = tasks.filter(t => !isEffectivelyDone(t))
+  const allCompleted = tasks.filter(t => isEffectivelyDone(t))
+  const filtered     = sourceFilter === 'all' ? pending : pending.filter(t => t.source === sourceFilter)
+  const calendarTasks = sourceFilter === 'all' ? tasks : tasks.filter(t => t.source === sourceFilter)
+
+  // Sun–Sat window aligned with FullCalendar's week view
+  const todayMid = new Date(now); todayMid.setHours(0, 0, 0, 0)
+  const weekStart = new Date(todayMid); weekStart.setDate(todayMid.getDate() - todayMid.getDay())
+  const weekEnd   = new Date(weekStart); weekEnd.setDate(weekStart.getDate() + 6); weekEnd.setHours(23, 59, 59, 999)
+  const monthStart = new Date(todayMid.getFullYear(), todayMid.getMonth(), 1)
+  const monthEnd   = new Date(todayMid.getFullYear(), todayMid.getMonth() + 1, 0, 23, 59, 59, 999)
+
+  const completedWindowStart = calView === 'day' ? todayMid : calView === 'week' ? weekStart : monthStart
+  const completedWindowEnd   = calView === 'day'
+    ? new Date(todayMid.getTime() + 24 * 60 * 60 * 1000 - 1)
+    : calView === 'week' ? weekEnd : monthEnd
+
   const completed = allCompleted.filter(t => {
     if (!t.due_at) return calView === 'month'
     const d = new Date(t.due_at)
@@ -468,10 +485,15 @@ export default function Dashboard() {
                               </div>
                             )}
                           </div>
-                          <button onClick={async()=>{await api.patch(`/tasks/${task.id}`,{status:'pending'});fetchTasks()}}
-                            style={{ fontFamily:"'Share Tech Mono',monospace",fontSize:'8px',letterSpacing:'0.1em',
-                              padding:'3px 8px',background:T.filterBg,border:`1px solid ${T.filterBorder}`,
-                              color:T.textSub,borderRadius:'2px',cursor:'pointer' }}>UNDO</button>
+                          {task.status === 'done'
+                            ? <button onClick={async()=>{await api.patch(`/tasks/${task.id}`,{status:'pending'});fetchTasks()}}
+                                style={{ fontFamily:"'Share Tech Mono',monospace",fontSize:'8px',letterSpacing:'0.1em',
+                                  padding:'3px 8px',background:T.filterBg,border:`1px solid ${T.filterBorder}`,
+                                  color:T.textSub,borderRadius:'2px',cursor:'pointer' }}>UNDO</button>
+                            : <span style={{ fontFamily:"'Share Tech Mono',monospace",fontSize:'8px',letterSpacing:'0.1em',
+                                padding:'3px 8px',background:n?'rgba(180,210,230,0.05)':'rgba(30,80,140,0.05)',
+                                border:`1px solid ${T.filterBorder}`,color:T.textFaint,borderRadius:'2px' }}>ELAPSED</span>
+                          }
                         </div>
                       ))}
                     </div>
