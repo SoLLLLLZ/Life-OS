@@ -96,7 +96,7 @@ async def google_callback(request: Request, db: Session = Depends(get_db)):
 
     # Create JWT and redirect to frontend
     jwt_token = create_access_token({"sub": str(user.id)})
-    return RedirectResponse(url=f"https://SoLLLLLZ.github.io/Life-OS?token={jwt_token}")
+    return RedirectResponse(url=f"https://solllllz.github.io/Life-OS?token={jwt_token}")
 
 
 @router.get("/me")
