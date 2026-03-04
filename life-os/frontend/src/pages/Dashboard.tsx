@@ -215,6 +215,7 @@ export default function Dashboard() {
   const [sourceFilter, setSourceFilter] = useState('all')
   const [showSettings, setShowSettings] = useState(false)
   const [focusMode, setFocusMode] = useState(false)
+  const [calView, setCalView] = useState<'month' | 'week' | 'day'>('week')
   const n = theme === 'tokyo' // isNight
 
   // ── Theme tokens ──
@@ -382,7 +383,7 @@ export default function Dashboard() {
       ) : (
         <>
           {/* ── GREETING HERO ── */}
-          <GreetingHero tasks={tasks} theme={theme} />
+          <GreetingHero tasks={tasks} theme={theme} calView={calView} />
 
           {/* ── FILTER BAR ── */}
           {view !== 'completed' && (
@@ -414,7 +415,7 @@ export default function Dashboard() {
               {view==='calendar' && card(
                 <><div className={n?'':'cal-day-theme'}>{sectionHead('Schedule Matrix')}</div>
                   <div className={n?'':'cal-day-theme'}>
-                    <CalendarView tasks={calendarTasks} onTaskUpdate={fetchTasks} theme={theme}/>
+                    <CalendarView tasks={calendarTasks} onTaskUpdate={fetchTasks} theme={theme} onViewChange={setCalView}/>
                   </div></>,
               )}
               {view==='tasks' && card(
