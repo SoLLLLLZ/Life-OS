@@ -47,6 +47,13 @@ def get_google_credentials(user: User, db: Session):
     return creds
 
 
+def _to_utc_naive(dt: datetime) -> datetime:
+    """Convert any datetime to UTC and strip tzinfo for storage."""
+    if dt.tzinfo is not None:
+        return dt.astimezone(timezone.utc).replace(tzinfo=None)
+    return dt
+
+
 def sync_google_calendar(user: User, db: Session) -> int:
     creds = get_google_credentials(user, db)
     if not creds:
@@ -54,7 +61,6 @@ def sync_google_calendar(user: User, db: Session) -> int:
 
     service = build("calendar", "v3", credentials=creds)
 
-    # Get all calendars
     calendars_result = service.calendarList().list().execute()
     calendars = calendars_result.get("items", [])
 
@@ -87,22 +93,30 @@ def sync_google_calendar(user: User, db: Session) -> int:
             html_link = event.get("htmlLink")
 
             start = event.get("start", {})
+            end = event.get("end", {})
+
             due_at = None
+            end_at = None
+
             if "dateTime" in start:
-                # Google returns timezone-aware datetimes (e.g. 09:00-05:00).
-                # We want the *wall-clock* time the user sees in Calendar,
-                # not UTC. Strip the timezone so 9am stays 9am locally.
                 try:
                     dt = datetime.fromisoformat(start["dateTime"])
-                    due_at = dt.replace(tzinfo=None)
+                    due_at = _to_utc_naive(dt)
                 except Exception:
                     due_at = None
             elif "date" in start:
-                # All-day event; treat as date-only (midnight local)
+                # All-day event — store as date only (no time component)
                 try:
                     due_at = datetime.fromisoformat(start["date"])
                 except Exception:
                     due_at = None
+
+            if "dateTime" in end:
+                try:
+                    dt = datetime.fromisoformat(end["dateTime"])
+                    end_at = _to_utc_naive(dt)
+                except Exception:
+                    end_at = None
 
             source_id = f"gcal_{event_id}"
             existing = db.execute(
@@ -116,6 +130,7 @@ def sync_google_calendar(user: User, db: Session) -> int:
                 existing.title = title
                 existing.description = description
                 existing.due_at = due_at
+                existing.end_at = end_at
                 existing.link_url = html_link
             else:
                 task = Task(
@@ -125,6 +140,7 @@ def sync_google_calendar(user: User, db: Session) -> int:
                     title=title,
                     description=description,
                     due_at=due_at,
+                    end_at=end_at,
                     link_url=html_link,
                     status=TaskStatus.pending,
                 )
@@ -144,7 +160,6 @@ def sync_gmail(user: User, db: Session) -> int:
     service = build("gmail", "v1", credentials=creds)
     count = 0
 
-    # Build query for starred emails and action keywords
     keyword_query = " OR ".join([f'"{kw}"' for kw in ACTION_KEYWORDS[:10]])
     queries = [
         "is:starred",

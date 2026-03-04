@@ -74,31 +74,31 @@ export default function CalendarView({ tasks, onTaskUpdate, theme }: Props) {
   const events = tasks
     .filter(t => t.due_at)
     .map(t => {
-      const style = getEventStyle(t.source, t.title)
-      const start = t.due_at!
-      const end = t.end_at || null
-      const isDateOnly = !start.includes('T')
-      const endTime = end ? new Date(end) : isDateOnly ? new Date(start) : new Date(new Date(start).getTime() + 60 * 60 * 1000)
-      const isPast = endTime < now
-      const isDone = t.status === 'done'
-      const classNames = [
-        isDone ? 'fc-done-event' : '',
-        isPast && !isDone ? 'fc-past-event' : '',
-      ].filter(Boolean)
-      return {
-        id: String(t.id),
-        title: t.title,
-        start,
-        ...(isDateOnly ? {} : end ? { end } : {
-          end: new Date(new Date(start).getTime() + 60 * 60 * 1000).toISOString(),
-        }),
-        allDay: isDateOnly,
-        backgroundColor: style.backgroundColor,
-        borderColor: style.borderColor,
-        textColor: n ? style.textColor : '#0f2040',
-        extendedProps: { task: t },
-        classNames,
-      }
+        const style = getEventStyle(t.source, t.title)
+        const start = t.due_at!
+        const end = t.end_at || null
+        const isDateOnly = !start.includes('T')
+        const endTime = end ? new Date(end) : isDateOnly ? new Date(start) : new Date(new Date(start).getTime() + 60 * 60 * 1000)
+        const isPast = endTime < now
+        const isDone = t.status === 'done'
+        const classNames = [
+            isDone ? 'fc-done-event' : '',
+            isPast && !isDone ? 'fc-past-event' : '',
+        ].filter(Boolean)
+        return {
+            id: String(t.id),
+            title: t.title,
+            start,
+            ...(isDateOnly ? {} : end ? { end } : {
+                end: new Date(new Date(start).getTime() + 60 * 60 * 1000).toISOString(),
+            }),
+            allDay: isDateOnly,
+            backgroundColor: style.backgroundColor,
+            borderColor: style.borderColor,
+            textColor: n ? style.textColor : '#0f2040',
+            extendedProps: { task: t },
+            classNames,
+        }
     })
 
   const toLocalInput = (d: Date) => {
@@ -126,8 +126,8 @@ export default function CalendarView({ tasks, onTaskUpdate, theme }: Props) {
   const handleEventClick = (arg: EventClickArg) => {
     const task: Task = arg.event.extendedProps.task
     setFormTitle(task.title)
-    setFormStart(task.due_at ? task.due_at.slice(0, 16) : '')
-    setFormEnd(task.end_at ? task.end_at.slice(0, 16) : '')
+    setFormStart(task.due_at ? toLocalInput(new Date(task.due_at)) : '')
+    setFormEnd(task.end_at ? toLocalInput(new Date(task.end_at)) : '')
     setModal({ mode: 'view', task })
   }
 
@@ -167,8 +167,8 @@ export default function CalendarView({ tasks, onTaskUpdate, theme }: Props) {
       await api.post('/tasks/', {
         title: formTitle.trim(),
         // send local datetime strings so backend stores naive datetimes
-        due_at: formStart || null,
-        end_at: formEnd || null,
+        due_at: formStart ? new Date(formStart).toISOString() : null,
+        end_at: formEnd ? new Date(formEnd).toISOString() : null,
       })
       onTaskUpdate()
       setModal(null)
@@ -183,8 +183,8 @@ export default function CalendarView({ tasks, onTaskUpdate, theme }: Props) {
     try {
       await api.patch(`/tasks/${modal.task.id}`, {
         title: formTitle.trim(),
-        due_at: formStart || null,
-        end_at: formEnd || null,
+        due_at: formStart ? new Date(formStart).toISOString() : null,
+        end_at: formEnd ? new Date(formEnd).toISOString() : null,
       })
       onTaskUpdate()
       setModal(null)

@@ -1,7 +1,18 @@
-from datetime import datetime
-from pydantic import BaseModel
+from datetime import datetime, timezone
+from pydantic import BaseModel, field_serializer
 from typing import Optional
 from app.models import TaskSource, TaskStatus
+
+
+def to_utc_str(dt: Optional[datetime]) -> Optional[str]:
+    """Always return ISO string with Z suffix so browsers parse as UTC."""
+    if dt is None:
+        return None
+    # If naive (no tzinfo), assume it's already UTC
+    if dt.tzinfo is None:
+        return dt.strftime('%Y-%m-%dT%H:%M:%S') + 'Z'
+    # If aware, convert to UTC first
+    return dt.astimezone(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S') + 'Z'
 
 
 class TaskCreate(BaseModel):
@@ -37,6 +48,10 @@ class TaskResponse(BaseModel):
     priority: int
     created_at: datetime
     updated_at: datetime
+
+    @field_serializer('due_at', 'end_at', 'created_at', 'updated_at')
+    def serialize_dt(self, dt: Optional[datetime]) -> Optional[str]:
+        return to_utc_str(dt)
 
     class Config:
         from_attributes = True
