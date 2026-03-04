@@ -1,13 +1,11 @@
 from pydantic_settings import BaseSettings
-from pydantic import field_validator
 from typing import List
-import json
 
 
 class Settings(BaseSettings):
     database_url: str = "sqlite:///./lifeos.db"
     log_level: str = "info"
-    cors_origins: List[str] = ["http://localhost:5173"]
+    cors_origins: str = "http://localhost:5173"
     secret_key: str = "change-me"
     google_client_id: str = ""
     google_client_secret: str = ""
@@ -18,14 +16,9 @@ class Settings(BaseSettings):
     spotify_client_secret: str = ""
     spotify_redirect_uri: str = "http://127.0.0.1:8000/auth/spotify/callback"
 
-    @field_validator("cors_origins", mode="before")
-    @classmethod
-    def parse_cors(cls, v):
-        if isinstance(v, str):
-            if v.startswith("["):
-                return json.loads(v)
-            return [i.strip() for i in v.split(",")]
-        return v
+    @property
+    def cors_origins_list(self) -> List[str]:
+        return [i.strip() for i in self.cors_origins.split(",")]
 
     @property
     def database_url_fixed(self) -> str:
