@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime, timezone
+from datetime import datetime
 from sqlalchemy.orm import Session
 from sqlalchemy import select
 from gradescopeapi.classes.connection import GSConnection
@@ -47,17 +47,10 @@ def sync_gradescope(user: User, db: Session) -> int:
                 title = assignment.name if hasattr(assignment, 'name') else "Unknown Assignment"
                 due_at = assignment.due_date if hasattr(assignment, 'due_date') else None
 
-                # Fix 1: handle timezone-aware vs naive datetime comparison
-                if due_at and isinstance(due_at, datetime):
-                    now = datetime.now(timezone.utc) if due_at.tzinfo else datetime.now()
-                    if due_at < now:
-                        continue
-
                 link_url = f"https://www.gradescope.com/courses/{course_id}"
                 if assignment_id:
                     link_url += f"/assignments/{assignment_id}"
 
-                # Fix 2: use assignment_id only as source_id to avoid duplicates
                 source_id = f"gradescope_{assignment_id}"
 
                 existing = db.execute(
