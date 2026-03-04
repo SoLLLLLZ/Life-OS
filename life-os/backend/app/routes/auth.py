@@ -103,6 +103,6 @@ def get_me(user: User = Depends(get_current_user)):
 
 @router.post("/logout")
 def logout():
-    response = RedirectResponse(url="http://localhost:5173")
+    response = RedirectResponse(url=f"https://SoLLLLLZ.github.io/life-os?token={jwt_token}")
     response.delete_cookie("access_token")
     return response
