@@ -267,6 +267,7 @@ export default function Dashboard() {
   const pending   = tasks.filter(t => t.status==='pending')
   const completed = tasks.filter(t => t.status==='done')
   const filtered  = sourceFilter==='all' ? pending : pending.filter(t => t.source===sourceFilter)
+  const calendarTasks = sourceFilter==='all' ? tasks : tasks.filter(t => t.source===sourceFilter)
 
   const sectionHead = (label: string) => (
     <div style={{ fontFamily:"'Cinzel',serif", fontSize:'10px', fontWeight:600,
@@ -413,7 +414,7 @@ export default function Dashboard() {
               {view==='calendar' && card(
                 <><div className={n?'':'cal-day-theme'}>{sectionHead('Schedule Matrix')}</div>
                   <div className={n?'':'cal-day-theme'}>
-                    <CalendarView tasks={filtered} onTaskUpdate={fetchTasks} theme={theme}/>
+                    <CalendarView tasks={calendarTasks} onTaskUpdate={fetchTasks} theme={theme}/>
                   </div></>,
               )}
               {view==='tasks' && card(
@@ -473,7 +474,7 @@ export default function Dashboard() {
                       <span style={{ color:T.diamond, fontSize:'6px' }}>◆</span>Quest Log
                     </div>
                     <span style={{ fontFamily:"'Share Tech Mono',monospace",
-                      fontSize:'9px', color:T.textFaint }}>{pending.length} pending</span>
+                      fontSize:'9px', color:T.textFaint }}>{filtered.length} pending</span>
                   </div>
                   <div style={{ padding:'10px 14px' }}>
                     <TaskList tasks={filtered} loading={loading} onTaskUpdate={fetchTasks} theme={theme}/>

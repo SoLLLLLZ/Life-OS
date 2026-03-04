@@ -89,9 +89,20 @@ def sync_google_calendar(user: User, db: Session) -> int:
             start = event.get("start", {})
             due_at = None
             if "dateTime" in start:
-                due_at = datetime.fromisoformat(start["dateTime"])
+                # Google returns timezone-aware datetimes (e.g. 09:00-05:00).
+                # We want the *wall-clock* time the user sees in Calendar,
+                # not UTC. Strip the timezone so 9am stays 9am locally.
+                try:
+                    dt = datetime.fromisoformat(start["dateTime"])
+                    due_at = dt.replace(tzinfo=None)
+                except Exception:
+                    due_at = None
             elif "date" in start:
-                due_at = datetime.fromisoformat(start["date"])
+                # All-day event; treat as date-only (midnight local)
+                try:
+                    due_at = datetime.fromisoformat(start["date"])
+                except Exception:
+                    due_at = None
 
             source_id = f"gcal_{event_id}"
             existing = db.execute(
