@@ -30,7 +30,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const token = params.get('token')
     if (token) {
       localStorage.setItem('token', token)
-      window.history.replaceState({}, '', '/')
+      window.history.replaceState({}, '', '/Life-OS/')
     }
     fetchUser()
   }, [])
