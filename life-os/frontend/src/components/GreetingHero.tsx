@@ -93,59 +93,71 @@ export default function GreetingHero({ tasks, theme, calView = 'week' }: Props) 
 
   const now2 = new Date()
   const today = new Date(); today.setHours(0,0,0,0)
-  const weekEnd = new Date(today); weekEnd.setDate(weekEnd.getDate() + 7)
 
+  // Sun–Sat week window matching FullCalendar's default week view
+  const weekStart = new Date(today); weekStart.setDate(today.getDate() - today.getDay())
+  const weekEnd   = new Date(weekStart); weekEnd.setDate(weekStart.getDate() + 6); weekEnd.setHours(23,59,59,999)
+
+  // Inline isEffectivelyDone (mirrors Dashboard logic)
+  const getEndTime = (t: Task): Date | null => {
+    if (!t.due_at) return null
+    if (t.end_at) return new Date(t.end_at)
+    if (!t.due_at.includes('T')) { const d = new Date(t.due_at); d.setHours(23,59,59,999); return d }
+    return new Date(new Date(t.due_at).getTime() + 60*60*1000)
+  }
+  const effectivelyDone = (t: Task) => {
+    if (t.status === 'done') return true
+    const end = getEndTime(t); return end !== null && end < now2
+  }
+
+  // Due Today: starts today, not elapsed, not done
   const dueToday = tasks.filter(t => {
-    if (!t.due_at || t.status === 'done') return false
+    if (effectivelyDone(t)) return false
+    if (!t.due_at) return false
     const d = new Date(t.due_at); const dDay = new Date(d); dDay.setHours(0,0,0,0)
     if (dDay.getTime() !== today.getTime()) return false
-    // exclude if the event's end time (or 1h after start) has already passed
-    const endTime = t.end_at ? new Date(t.end_at) : new Date(d.getTime() + 60*60*1000)
-    return endTime > now2
+    const end = getEndTime(t)!
+    return end > now2
   }).length
+
+  // This Week: starts within Sun–Sat, not elapsed, not done
   const dueThisWeek = tasks.filter(t => {
-    if (!t.due_at || t.status === 'done') return false
+    if (effectivelyDone(t)) return false
+    if (!t.due_at) return false
     const d = new Date(t.due_at)
-    const endTime = t.end_at ? new Date(t.end_at) : new Date(d.getTime() + 60*60*1000)
-    // only count future events within the next 7 days
-    return endTime > now2 && d <= weekEnd
+    const end = getEndTime(t)!
+    return d >= weekStart && d <= weekEnd && end > now2
   }).length
+
   // Gradescope pending count filtered to the current calendar view window
   const gsWindowEnd = new Date(today)
   if (calView === 'day') {
     gsWindowEnd.setDate(gsWindowEnd.getDate() + 1)
   } else if (calView === 'week') {
-    gsWindowEnd.setDate(gsWindowEnd.getDate() + 7)
+    gsWindowEnd.setTime(weekEnd.getTime())
   } else {
     gsWindowEnd.setMonth(gsWindowEnd.getMonth() + 1)
   }
   const gradescope = tasks.filter(t => {
-    if (t.source !== 'gradescope' || t.status !== 'pending') return false
-    if (!t.due_at) return false // no due date = no window to place it
+    if (t.source !== 'gradescope' || effectivelyDone(t)) return false
+    if (!t.due_at) return false
     const d = new Date(t.due_at)
     return d >= today && d <= gsWindowEnd
   }).length
 
-  // Vanquished: count completed tasks within the calendar's current view window
-  const vanquishedWindowStart = new Date(today)
-  const vanquishedWindowEnd   = new Date(today)
-  if (calView === 'day') {
-    // just today
-    vanquishedWindowEnd.setDate(vanquishedWindowEnd.getDate() + 1)
-  } else if (calView === 'week') {
-    // last 7 days through next 7 days (current week context)
-    vanquishedWindowStart.setDate(vanquishedWindowStart.getDate() - 7)
-    vanquishedWindowEnd.setDate(vanquishedWindowEnd.getDate() + 7)
-  } else {
-    // month: last 30 days through end of month
-    vanquishedWindowStart.setDate(vanquishedWindowStart.getDate() - 30)
-    vanquishedWindowEnd.setMonth(vanquishedWindowEnd.getMonth() + 1)
-  }
+  // Vanquished: effectively done within the current view window
+  const monthStart = new Date(today.getFullYear(), today.getMonth(), 1)
+  const monthEnd   = new Date(today.getFullYear(), today.getMonth() + 1, 0, 23, 59, 59, 999)
+  const vStart = calView === 'day' ? today : calView === 'week' ? weekStart : monthStart
+  const vEnd   = calView === 'day'
+    ? new Date(today.getTime() + 24*60*60*1000 - 1)
+    : calView === 'week' ? weekEnd : monthEnd
+
   const completed = tasks.filter(t => {
-    if (t.status !== 'done') return false
-    if (!t.due_at) return calView === 'month' // tasks without dates count in month view only
+    if (!effectivelyDone(t)) return false
+    if (!t.due_at) return calView === 'month'
     const d = new Date(t.due_at)
-    return d >= vanquishedWindowStart && d <= vanquishedWindowEnd
+    return d >= vStart && d <= vEnd
   }).length
 
   const vanquishedSublabel = calView === 'day' ? 'today' : calView === 'week' ? 'this week' : 'this month'
