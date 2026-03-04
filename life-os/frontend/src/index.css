@@ -95,6 +95,8 @@ body {
 .fc-daygrid-day { background: transparent !important; }
 .fc-col-header { background: rgba(5,8,16,0.7) !important; }
 .fc-toolbar { margin-bottom: 12px !important; }
+.fc-done-event { opacity: 0.38 !important; }
+.fc-past-event { opacity: 0.52 !important; }
 
 /* ── FullCalendar day-mode overrides ── */
 .cal-day-theme .fc-theme-standard td,

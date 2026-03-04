@@ -70,6 +70,7 @@ export default function CalendarView({ tasks, onTaskUpdate, theme }: Props) {
     overlay:     'rgba(0,0,0,0.65)',
   }
 
+  const now = new Date()
   const events = tasks
     .filter(t => t.due_at)
     .map(t => {
@@ -77,6 +78,13 @@ export default function CalendarView({ tasks, onTaskUpdate, theme }: Props) {
       const start = t.due_at!
       const end = t.end_at || null
       const isDateOnly = !start.includes('T')
+      const endTime = end ? new Date(end) : isDateOnly ? new Date(start) : new Date(new Date(start).getTime() + 60 * 60 * 1000)
+      const isPast = endTime < now
+      const isDone = t.status === 'done'
+      const classNames = [
+        isDone ? 'fc-done-event' : '',
+        isPast && !isDone ? 'fc-past-event' : '',
+      ].filter(Boolean)
       return {
         id: String(t.id),
         title: t.title,
@@ -89,7 +97,7 @@ export default function CalendarView({ tasks, onTaskUpdate, theme }: Props) {
         borderColor: style.borderColor,
         textColor: n ? style.textColor : '#0f2040',
         extendedProps: { task: t },
-        classNames: t.status === 'done' ? ['fc-done-event'] : [],
+        classNames,
       }
     })
 
@@ -389,7 +397,8 @@ export default function CalendarView({ tasks, onTaskUpdate, theme }: Props) {
         .fc-event:active { cursor: grabbing !important; }
         .fc-event-title { font-weight: 700 !important; }
         .fc-event-time { font-size: 9px !important; opacity: 0.75 !important; font-family: 'Share Tech Mono', monospace !important; }
-        .fc-done-event { opacity: 0.38 !important; }
+        .fc-done-event { opacity: 0.38 !important; text-decoration: line-through; }
+        .fc-past-event { opacity: 0.52 !important; }
         .fc-timegrid-slot { height: 2.8rem !important; }
         .fc-timegrid-slot-label { color: ${n ? 'rgba(180,210,230,0.38)' : 'rgba(20,50,100,0.42)'} !important; font-size: 9px !important; font-family: 'Share Tech Mono', monospace !important; }
         .fc-timegrid-now-indicator-line { border-color: #c0392b !important; box-shadow: 0 0 5px rgba(192,57,43,0.7) !important; }
