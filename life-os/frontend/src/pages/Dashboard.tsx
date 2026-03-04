@@ -397,7 +397,7 @@ export default function Dashboard() {
         </div>
       </header>
 
-      {showSettings ? <Settings /> : focusMode ? (
+      {showSettings ? <Settings theme={theme} /> : focusMode ? (
         <FocusMode theme={theme} accentColor={accentColor} bpm={bpm} />
       ) : (
         <>
