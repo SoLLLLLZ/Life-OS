@@ -96,7 +96,7 @@ body {
 .fc-col-header { background: rgba(5,8,16,0.7) !important; }
 .fc-toolbar { margin-bottom: 12px !important; }
 .fc-done-event { opacity: 0.32 !important; text-decoration: line-through; filter: saturate(0.4) !important; }
-.fc-past-event { opacity: 0.42 !important; filter: saturate(0.55) brightness(0.8) !important; }
+.fc-past-event { opacity: 0.55 !important; filter: saturate(0.6) brightness(0.85) !important; }
 
 /* ── FullCalendar +more popover — night mode ── */
 .fc-popover {
