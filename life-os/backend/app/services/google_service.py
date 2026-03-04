@@ -105,7 +105,6 @@ def sync_google_calendar(user: User, db: Session) -> int:
                 except Exception:
                     due_at = None
             elif "date" in start:
-                # All-day event — store as date only (no time component)
                 try:
                     due_at = datetime.fromisoformat(start["date"])
                 except Exception:
@@ -124,7 +123,7 @@ def sync_google_calendar(user: User, db: Session) -> int:
                     Task.user_id == user.id,
                     Task.source_id == source_id
                 )
-            ).scalar_one_or_none()
+            ).scalars().first()
 
             if existing:
                 existing.title = title
@@ -194,7 +193,7 @@ def sync_gmail(user: User, db: Session) -> int:
                     Task.user_id == user.id,
                     Task.source_id == source_id
                 )
-            ).scalar_one_or_none()
+            ).scalars().first()
 
             if existing:
                 continue
