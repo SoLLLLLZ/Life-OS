@@ -5,6 +5,8 @@ from google.oauth2.credentials import Credentials
 from google.auth.transport.requests import Request
 from sqlalchemy.orm import Session
 from sqlalchemy import select
+from datetime import timedelta
+
 
 from app.models import User, Task, TaskSource, TaskStatus, IntegrationToken
 
@@ -74,9 +76,12 @@ def sync_google_calendar(user: User, db: Session) -> int:
             continue
 
         try:
+
+            time_min = (datetime.now(timezone.utc) - timedelta(days=30)).isoformat()
+
             events_result = service.events().list(
                 calendarId=cal_id,
-                timeMin=now,
+                ttimeMin=time_min,
                 singleEvents=True,
                 orderBy="startTime",
                 maxResults=250,
